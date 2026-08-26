@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Meus Alunos</title>
+
+<!-- PWA / instalação como app -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#12A594" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Meus Alunos" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+
+<style>
+  html, body { margin: 0; padding: 0; background: #F6F7FB; }
+  #root { min-height: 100vh; }
+</style>
+
+<!-- React (sem precisar de build/instalação) -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // Guarda os dados direto no navegador deste aparelho (não sai daqui, não sincroniza com outro dispositivo).
+  window.storage = {
+    async get(key) {
+      const v = localStorage.getItem(key);
+      if (v === null) throw new Error("not found");
+      return { key, value: v };
+    },
+    async set(key, value) {
+      localStorage.setItem(key, value);
+      return { key, value };
+    }
+  };
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+</script>
+
+<script src="app.js"></script>
+</body>
+</html>
