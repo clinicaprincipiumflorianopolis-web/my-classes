@@ -1,10 +1,12 @@
-const CACHE_NAME = "painel-alunos-v3";
+const CACHE_NAME = "painel-alunos-v4";
 const ASSETS = [
   "./index.html",
   "./app.js",
   "./manifest.json",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./react.production.min.js",
+  "./react-dom.production.min.js"
 ];
 
 self.addEventListener("install", (event) => {
