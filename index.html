@@ -26,16 +26,18 @@
     async get(key, _raw) {
       try {
         const v = localStorage.getItem(key);
-        return v ? JSON.parse(v) : null;
+        return v !== null ? { value: v } : null;
       } catch (e) {
         return null;
       }
     },
     async set(key, value, _raw) {
       try {
-        localStorage.setItem(key, JSON.stringify(value));
+        localStorage.setItem(key, value);
+        return true;
       } catch (e) {
         console.error("Erro ao salvar dados", e);
+        return false;
       }
     }
   };

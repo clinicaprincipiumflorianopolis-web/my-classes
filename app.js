@@ -197,8 +197,13 @@ function PainelAlunos() {
   async function persist(newData) {
     setData(newData);
     try {
-      const res = await window.storage.set(STORAGE_KEY, JSON.stringify(newData), false);
+      const serialized = JSON.stringify(newData);
+      const res = await window.storage.set(STORAGE_KEY, serialized, false);
       setSaveError(!res);
+      try {
+        await window.storage.set(STORAGE_KEY + "_backup_1", serialized, false);
+      } catch (e) {
+      }
     } catch (e) {
       setSaveError(true);
     }
