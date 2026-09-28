@@ -229,6 +229,7 @@ function PainelAlunos() {
   const [data, setData] = useState(emptyData);
   const [loading, setLoading] = useState(true);
   const [saveError, setSaveError] = useState(false);
+  const [corruptedWarning, setCorruptedWarning] = useState(false);
   const [view, setView] = useState({ screen: "dashboard" });
   const [showAddStudent, setShowAddStudent] = useState(false);
   useEffect(() => {
@@ -239,7 +240,21 @@ function PainelAlunos() {
     (() => __async(null, null, function* () {
       try {
         const res = yield window.storage.get(STORAGE_KEY, false);
-        setData(res && res.value ? JSON.parse(res.value) : emptyData);
+        let parsed = null;
+        if (res && res.value) {
+          try {
+            parsed = JSON.parse(res.value);
+          } catch (e) {
+            parsed = null;
+          }
+        }
+        const isValidShape = parsed && typeof parsed === "object" && Array.isArray(parsed.students) && typeof parsed.lessons === "object" && parsed.lessons !== null && typeof parsed.closed === "object" && parsed.closed !== null;
+        if (isValidShape) {
+          setData(parsed);
+        } else {
+          if (parsed !== null) setCorruptedWarning(true);
+          setData(emptyData);
+        }
       } catch (e) {
         setData(emptyData);
       } finally {
@@ -369,7 +384,7 @@ function PainelAlunos() {
   if (loading) {
     return /* @__PURE__ */ React.createElement(Shell, null, /* @__PURE__ */ React.createElement("div", { style: { padding: 40, textAlign: "center", color: "var(--muted)" } }, "Carregando painel\u2026"));
   }
-  return /* @__PURE__ */ React.createElement(Shell, { saveError, onRetry: () => persist(data) }, view.screen === "dashboard" && /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement(Shell, { saveError, onRetry: () => persist(data), corruptedWarning, onDismissCorrupted: () => setCorruptedWarning(false) }, view.screen === "dashboard" && /* @__PURE__ */ React.createElement(
     Dashboard,
     {
       data,
@@ -420,7 +435,7 @@ function PainelAlunos() {
     }
   ), showAddStudent && /* @__PURE__ */ React.createElement(StudentModal, { onClose: () => setShowAddStudent(false), onSave: addStudent }));
 }
-function Shell({ children, saveError, onRetry }) {
+function Shell({ children, saveError, onRetry, corruptedWarning, onDismissCorrupted }) {
   return /* @__PURE__ */ React.createElement("div", { className: "pa-root" }, /* @__PURE__ */ React.createElement("style", null, `
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
         .pa-root {
@@ -471,7 +486,7 @@ function Shell({ children, saveError, onRetry }) {
           .pa-root { padding: 18px 12px 48px; }
           .pa-h1 { font-size: 22px; }
         }
-      `), children, saveError && /* @__PURE__ */ React.createElement("div", { className: "pa-save-error" }, "N\xE3o consegui salvar agora.", /* @__PURE__ */ React.createElement("button", { className: "pa-btn", style: { padding: "4px 10px" }, onClick: onRetry }, "Tentar de novo")));
+      `), children, corruptedWarning && /* @__PURE__ */ React.createElement("div", { className: "pa-save-error", style: { background: "#FFF4E5", borderColor: "#F5C77E", color: "#8A5A00" } }, "Os dados salvos aqui neste navegador estavam corrompidos, ent\xE3o reiniciei do zero pra n\xE3o travar a tela. Se voc\xEA tiver um backup exportado, importe de novo pela tela principal.", /* @__PURE__ */ React.createElement("button", { className: "pa-btn", style: { padding: "4px 10px" }, onClick: onDismissCorrupted }, "Entendi")), saveError && /* @__PURE__ */ React.createElement("div", { className: "pa-save-error" }, "N\xE3o consegui salvar agora.", /* @__PURE__ */ React.createElement("button", { className: "pa-btn", style: { padding: "4px 10px" }, onClick: onRetry }, "Tentar de novo")));
 }
 function Dashboard({
   data,
