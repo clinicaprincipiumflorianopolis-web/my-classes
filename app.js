@@ -1,3 +1,55 @@
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __restKey = (key) => typeof key === "symbol" ? key : key + "";
+var __objRest = (source, exclude) => {
+  var target = {};
+  for (var prop in source)
+    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
+      target[prop] = source[prop];
+  if (source != null && __getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(source)) {
+      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
+        target[prop] = source[prop];
+    }
+  return target;
+};
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 const { useState, useEffect, useMemo, useRef } = React;
 const PALETTE = ["#12A594", "#5B6EE1", "#F2994A", "#EB5757", "#9B51E0", "#2D9CDB"];
 const PIX = "54794320000190";
@@ -152,8 +204,9 @@ function findSimilarLesson(newDesc, existingLessons) {
   return null;
 }
 function initials(name) {
+  var _a, _b;
   const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase();
+  return ((((_a = parts[0]) == null ? void 0 : _a[0]) || "") + (((_b = parts[1]) == null ? void 0 : _b[0]) || "")).toUpperCase();
 }
 function normalizePhone(raw) {
   let digits = (raw || "").replace(/\D/g, "");
@@ -183,30 +236,28 @@ function PainelAlunos() {
   }, [view]);
   const CUR_MONTH = todayKey();
   useEffect(() => {
-    (async () => {
+    (() => __async(null, null, function* () {
       try {
-        const res = await window.storage.get(STORAGE_KEY, false);
+        const res = yield window.storage.get(STORAGE_KEY, false);
         setData(res && res.value ? JSON.parse(res.value) : emptyData);
       } catch (e) {
         setData(emptyData);
       } finally {
         setLoading(false);
       }
-    })();
+    }))();
   }, []);
-  async function persist(newData) {
-    setData(newData);
-    try {
-      const serialized = JSON.stringify(newData);
-      const res = await window.storage.set(STORAGE_KEY, serialized, false);
-      setSaveError(!res);
+  function persist(newData) {
+    return __async(this, null, function* () {
+      setData(newData);
       try {
-        await window.storage.set(STORAGE_KEY + "_backup_1", serialized, false);
+        const serialized = JSON.stringify(newData);
+        const res = yield window.storage.set(STORAGE_KEY, serialized, false);
+        setSaveError(!res);
       } catch (e) {
+        setSaveError(true);
       }
-    } catch (e) {
-      setSaveError(true);
-    }
+    });
   }
   const pendingByStudent = useMemo(() => {
     const map = {};
@@ -231,74 +282,89 @@ function PainelAlunos() {
     return map;
   }, [data, curYear, curMonthIdx0]);
   const yearRevenue = useMemo(() => computeYearRevenue(data, curYear), [data, curYear]);
-  async function handleImportData(imported) {
-    if (!imported || !Array.isArray(imported.students) || typeof imported.lessons !== "object") {
-      return false;
-    }
-    await persist({
-      students: imported.students,
-      lessons: imported.lessons || {},
-      closed: imported.closed || {}
-    });
-    return true;
-  }
-  async function addStudent({ name, phone, rate, schedule, lessonsPerMonth }) {
-    const s = {
-      id: uid(),
-      name,
-      phone,
-      rate: Number(rate) || 0,
-      schedule: (schedule || []).map((e) => ({ day: Number(e.day), time: e.time || "" })),
-      lessonsPerMonth: lessonsPerMonth === "" ? null : Number(lessonsPerMonth)
-    };
-    await persist({ ...data, students: [...data.students, s] });
-    setShowAddStudent(false);
-  }
-  async function updateStudent(id, patch) {
-    const normalized = { ...patch };
-    if ("rate" in normalized) normalized.rate = Number(normalized.rate) || 0;
-    if ("schedule" in normalized) {
-      normalized.schedule = (normalized.schedule || []).map((e) => ({ day: Number(e.day), time: e.time || "" }));
-      delete normalized.scheduleDay;
-      delete normalized.scheduleTime;
-    }
-    if ("lessonsPerMonth" in normalized) normalized.lessonsPerMonth = normalized.lessonsPerMonth === "" ? null : Number(normalized.lessonsPerMonth);
-    await persist({
-      ...data,
-      students: data.students.map((s) => s.id === id ? { ...s, ...normalized } : s)
+  function handleImportData(imported) {
+    return __async(this, null, function* () {
+      if (!imported || !Array.isArray(imported.students) || typeof imported.lessons !== "object") {
+        return false;
+      }
+      yield persist({
+        students: imported.students,
+        lessons: imported.lessons || {},
+        closed: imported.closed || {}
+      });
+      return true;
     });
   }
-  async function removeStudent(id) {
-    const { [id]: _l, ...restLessons } = data.lessons;
-    const { [id]: _c, ...restClosed } = data.closed;
-    await persist({
-      students: data.students.filter((s) => s.id !== id),
-      lessons: restLessons,
-      closed: restClosed
-    });
-    setView({ screen: "dashboard" });
-  }
-  async function addLesson(studentId, lesson) {
-    const list = data.lessons[studentId] || [];
-    await persist({
-      ...data,
-      lessons: { ...data.lessons, [studentId]: [...list, { id: uid(), ...lesson }] }
+  function addStudent(_0) {
+    return __async(this, arguments, function* ({ name, phone, rate, schedule, lessonsPerMonth }) {
+      const s = {
+        id: uid(),
+        name,
+        phone,
+        rate: Number(rate) || 0,
+        schedule: (schedule || []).map((e) => ({ day: Number(e.day), time: e.time || "" })),
+        lessonsPerMonth: lessonsPerMonth === "" ? null : Number(lessonsPerMonth)
+      };
+      yield persist(__spreadProps(__spreadValues({}, data), { students: [...data.students, s] }));
+      setShowAddStudent(false);
     });
   }
-  async function removeLesson(studentId, lessonId) {
-    const list = (data.lessons[studentId] || []).filter((l) => l.id !== lessonId);
-    await persist({ ...data, lessons: { ...data.lessons, [studentId]: list } });
+  function updateStudent(id, patch) {
+    return __async(this, null, function* () {
+      const normalized = __spreadValues({}, patch);
+      if ("rate" in normalized) normalized.rate = Number(normalized.rate) || 0;
+      if ("schedule" in normalized) {
+        normalized.schedule = (normalized.schedule || []).map((e) => ({ day: Number(e.day), time: e.time || "" }));
+        delete normalized.scheduleDay;
+        delete normalized.scheduleTime;
+      }
+      if ("lessonsPerMonth" in normalized) normalized.lessonsPerMonth = normalized.lessonsPerMonth === "" ? null : Number(normalized.lessonsPerMonth);
+      yield persist(__spreadProps(__spreadValues({}, data), {
+        students: data.students.map((s) => s.id === id ? __spreadValues(__spreadValues({}, s), normalized) : s)
+      }));
+    });
   }
-  async function closeMonth(studentId, monthKey, lessons, message) {
-    const total = lessons.length * (Number(data.students.find((s) => s.id === studentId)?.rate) || 0);
-    const studentClosed = { ...data.closed[studentId] || {} };
-    studentClosed[monthKey] = { count: lessons.length, total, message, closedAt: (/* @__PURE__ */ new Date()).toISOString() };
-    await persist({ ...data, closed: { ...data.closed, [studentId]: studentClosed } });
+  function removeStudent(id) {
+    return __async(this, null, function* () {
+      const _a = data.lessons, { [id]: _l } = _a, restLessons = __objRest(_a, [__restKey(id)]);
+      const _b = data.closed, { [id]: _c } = _b, restClosed = __objRest(_b, [__restKey(id)]);
+      yield persist({
+        students: data.students.filter((s) => s.id !== id),
+        lessons: restLessons,
+        closed: restClosed
+      });
+      setView({ screen: "dashboard" });
+    });
   }
-  async function reopenMonth(studentId, monthKey) {
-    const studentClosed = { ...data.closed[studentId] || {} };
-    delete studentClosed[monthKey];
-    await persist({ ...data, closed: { ...data.closed, [studentId]: studentClosed } });
+  function addLesson(studentId, lesson) {
+    return __async(this, null, function* () {
+      const list = data.lessons[studentId] || [];
+      yield persist(__spreadProps(__spreadValues({}, data), {
+        lessons: __spreadProps(__spreadValues({}, data.lessons), { [studentId]: [...list, __spreadValues({ id: uid() }, lesson)] })
+      }));
+    });
+  }
+  function removeLesson(studentId, lessonId) {
+    return __async(this, null, function* () {
+      const list = (data.lessons[studentId] || []).filter((l) => l.id !== lessonId);
+      yield persist(__spreadProps(__spreadValues({}, data), { lessons: __spreadProps(__spreadValues({}, data.lessons), { [studentId]: list }) }));
+    });
+  }
+  function closeMonth(studentId, monthKey, lessons, message) {
+    return __async(this, null, function* () {
+      var _a;
+      const total = lessons.length * (Number((_a = data.students.find((s) => s.id === studentId)) == null ? void 0 : _a.rate) || 0);
+      const studentClosed = __spreadValues({}, data.closed[studentId] || {});
+      studentClosed[monthKey] = { count: lessons.length, total, message, closedAt: (/* @__PURE__ */ new Date()).toISOString() };
+      yield persist(__spreadProps(__spreadValues({}, data), { closed: __spreadProps(__spreadValues({}, data.closed), { [studentId]: studentClosed }) }));
+    });
+  }
+  function reopenMonth(studentId, monthKey) {
+    return __async(this, null, function* () {
+      const studentClosed = __spreadValues({}, data.closed[studentId] || {});
+      delete studentClosed[monthKey];
+      yield persist(__spreadProps(__spreadValues({}, data), { closed: __spreadProps(__spreadValues({}, data.closed), { [studentId]: studentClosed }) }));
+    });
   }
   if (loading) {
     return /* @__PURE__ */ React.createElement(Shell, null, /* @__PURE__ */ React.createElement("div", { style: { padding: 40, textAlign: "center", color: "var(--muted)" } }, "Carregando painel\u2026"));
@@ -440,22 +506,23 @@ function Dashboard({
     URL.revokeObjectURL(url);
   }
   function handleImportClick() {
-    fileInputRef.current?.click();
+    var _a;
+    (_a = fileInputRef.current) == null ? void 0 : _a.click();
   }
   function handleFileChange(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async (evt) => {
+    reader.onload = (evt) => __async(null, null, function* () {
       try {
         const imported = JSON.parse(evt.target.result);
-        const ok = await onImportData(imported);
+        const ok = yield onImportData(imported);
         setImportMsg(ok ? "success" : "error");
       } catch (err) {
         setImportMsg("error");
       }
       setTimeout(() => setImportMsg(null), 4e3);
-    };
+    });
     reader.readAsText(file);
     e.target.value = "";
   }
@@ -584,13 +651,15 @@ function BroadcastScreen({ data, onBack }) {
     const first = student.name.trim().split(/\s+/)[0];
     return message.replaceAll("{nome}", first);
   }
-  async function handleCopy(student) {
-    try {
-      await navigator.clipboard.writeText(personalize(student));
-      setCopiedId(student.id);
-      setTimeout(() => setCopiedId(null), 2e3);
-    } catch (e) {
-    }
+  function handleCopy(student) {
+    return __async(this, null, function* () {
+      try {
+        yield navigator.clipboard.writeText(personalize(student));
+        setCopiedId(student.id);
+        setTimeout(() => setCopiedId(null), 2e3);
+      } catch (e) {
+      }
+    });
   }
   const selectedStudents = data.students.filter((s) => selected.has(s.id));
   return /* @__PURE__ */ React.createElement("div", { style: { maxWidth: 760, margin: "0 auto" } }, /* @__PURE__ */ React.createElement("button", { className: "pa-btn ghost", onClick: onBack, style: { marginBottom: 10, paddingLeft: 0 } }, "\u2190 Voltar"), /* @__PURE__ */ React.createElement("h1", { className: "pa-h1" }, "Aviso geral"), /* @__PURE__ */ React.createElement("p", { className: "pa-muted", style: { marginTop: 4 } }, "Escreva uma mensagem (use ", /* @__PURE__ */ React.createElement("strong", null, "{nome}"), " para o primeiro nome de cada aluno), escolha para quem enviar, e mande pelo WhatsApp um por um \u2014 cada aluno recebe a conversa j\xE1 aberta com a mensagem pronta."), /* @__PURE__ */ React.createElement("div", { className: "pa-card", style: { padding: 18, marginTop: 16 } }, /* @__PURE__ */ React.createElement("label", { className: "pa-muted", style: { display: "block", marginBottom: 6 } }, "Mensagem"), /* @__PURE__ */ React.createElement(
@@ -645,18 +714,19 @@ function SuggestionsScreen({ student, lessons, onBack }) {
   return /* @__PURE__ */ React.createElement("div", { style: { maxWidth: 760, margin: "0 auto" } }, /* @__PURE__ */ React.createElement("button", { className: "pa-btn ghost", onClick: onBack, style: { marginBottom: 10, paddingLeft: 0 } }, "\u2190 Voltar"), /* @__PURE__ */ React.createElement("h1", { className: "pa-h1" }, "Sugest\xF5es para ", student.name), /* @__PURE__ */ React.createElement("p", { className: "pa-muted", style: { marginTop: 4 } }, "Aulas do seu cat\xE1logo do Canva que ainda n\xE3o aparecem no hist\xF3rico deste aluno. A compara\xE7\xE3o \xE9 por nome \u2014 vale conferir antes, pode haver aulas com nomes um pouco diferentes do que voc\xEA registrou."), /* @__PURE__ */ React.createElement("div", { className: "pa-card", style: { padding: 16, marginTop: 16 } }, /* @__PURE__ */ React.createElement("p", { style: { margin: 0, fontSize: 14 } }, totalSuggestions, " sugest\xE3o(\xF5es) em ", suggestions.length, " categoria(s)")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 16 } }, suggestions.length === 0 && /* @__PURE__ */ React.createElement("p", { className: "pa-muted" }, "Nenhuma sugest\xE3o \u2014 parece que esse aluno j\xE1 viu tudo do cat\xE1logo (ou os nomes n\xE3o bateram)."), suggestions.map(([category, items]) => /* @__PURE__ */ React.createElement("div", { key: category, className: "pa-card", style: { padding: 16, marginBottom: 12 } }, /* @__PURE__ */ React.createElement("strong", null, category), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 8 } }, items.map((title) => /* @__PURE__ */ React.createElement("div", { key: title, style: { padding: "6px 0", borderTop: "1px solid var(--border)", fontSize: 14 } }, title)))))));
 }
 function StudentModal({ onClose, onSave, initial }) {
-  const [name, setName] = useState(initial?.name || "");
-  const [phone, setPhone] = useState(initial?.phone || "");
-  const [rate, setRate] = useState(initial?.rate ?? "");
+  var _a;
+  const [name, setName] = useState((initial == null ? void 0 : initial.name) || "");
+  const [phone, setPhone] = useState((initial == null ? void 0 : initial.phone) || "");
+  const [rate, setRate] = useState((_a = initial == null ? void 0 : initial.rate) != null ? _a : "");
   const [schedule, setSchedule] = useState(() => {
     const existing = initial ? getSchedule(initial) : [];
     return existing.length > 0 ? existing.map((e) => ({ day: String(e.day), time: e.time || "" })) : [{ day: "", time: "" }];
   });
   const [lessonsPerMonth, setLessonsPerMonth] = useState(
-    initial?.lessonsPerMonth !== void 0 && initial?.lessonsPerMonth !== null ? String(initial.lessonsPerMonth) : ""
+    (initial == null ? void 0 : initial.lessonsPerMonth) !== void 0 && (initial == null ? void 0 : initial.lessonsPerMonth) !== null ? String(initial.lessonsPerMonth) : ""
   );
   function updateScheduleEntry(index, field, value) {
-    setSchedule((prev) => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
+    setSchedule((prev) => prev.map((e, i) => i === index ? __spreadProps(__spreadValues({}, e), { [field]: value }) : e));
   }
   function addScheduleEntry() {
     setSchedule((prev) => [...prev, { day: "", time: "" }]);
@@ -732,12 +802,12 @@ function StudentDetail({
   const [search, setSearch] = useState("");
   const [similarWarning, setSimilarWarning] = useState(null);
   const [manualClosingMonth, setManualClosingMonth] = useState(null);
-  const [notesText, setNotesText] = useState(student?.notes || "");
+  const [notesText, setNotesText] = useState((student == null ? void 0 : student.notes) || "");
   const [notesConfirmClear, setNotesConfirmClear] = useState(false);
   useEffect(() => {
-    setNotesText(student?.notes || "");
+    setNotesText((student == null ? void 0 : student.notes) || "");
     setNotesConfirmClear(false);
-  }, [student?.id]);
+  }, [student == null ? void 0 : student.id]);
   function handleNotesBlur() {
     if (notesText !== (student.notes || "")) {
       onUpdateStudent({ notes: notesText });
@@ -916,14 +986,16 @@ function ClosingCard({ student, monthKey, lessons, onClose, onDismiss }) {
   const [archived, setArchived] = useState(false);
   const total = lessons.length * (Number(student.rate) || 0);
   const waLink = `https://wa.me/${normalizePhone(student.phone)}?text=${encodeURIComponent(message)}`;
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(message);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2e3);
-    } catch (e) {
-      setCopied(false);
-    }
+  function handleCopy() {
+    return __async(this, null, function* () {
+      try {
+        yield navigator.clipboard.writeText(message);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2e3);
+      } catch (e) {
+        setCopied(false);
+      }
+    });
   }
   if (archived) return null;
   return /* @__PURE__ */ React.createElement("div", { style: { marginTop: 20, position: "relative" } }, /* @__PURE__ */ React.createElement(
