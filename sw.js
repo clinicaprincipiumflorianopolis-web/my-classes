@@ -1,5 +1,11 @@
 const CACHE_NAME = "painel-alunos-v2";
-const ASSETS = ["./", "./index.html", "./app.js", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const ASSETS = [
+  "./index.html",
+  "./app.js",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -11,23 +17,27 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
     )
   );
   self.clients.claim();
 });
 
-// Network-first: sempre tenta buscar a versão mais nova primeiro.
-// Só usa a cópia salva se estiver sem internet.
+// Estratégia "network-first": sempre tenta buscar a versão mais nova na rede;
+// só usa o cache se estiver sem internet.
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request)
-      .then((networkResponse) => {
-        if (event.request.method === "GET" && networkResponse.ok) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return networkResponse;
+      .then((response) => {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
       })
       .catch(() => caches.match(event.request))
   );

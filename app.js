@@ -727,6 +727,22 @@ function StudentDetail({
   const [search, setSearch] = useState("");
   const [similarWarning, setSimilarWarning] = useState(null);
   const [manualClosingMonth, setManualClosingMonth] = useState(null);
+  const [notesText, setNotesText] = useState(student?.notes || "");
+  const [notesConfirmClear, setNotesConfirmClear] = useState(false);
+  useEffect(() => {
+    setNotesText(student?.notes || "");
+    setNotesConfirmClear(false);
+  }, [student?.id]);
+  function handleNotesBlur() {
+    if (notesText !== (student.notes || "")) {
+      onUpdateStudent({ notes: notesText });
+    }
+  }
+  function handleNotesClear() {
+    setNotesText("");
+    onUpdateStudent({ notes: "" });
+    setNotesConfirmClear(false);
+  }
   if (!student) return /* @__PURE__ */ React.createElement("div", { className: "pa-muted" }, "Aluno n\xE3o encontrado.");
   const color = hashColor(student.id);
   const byMonth = useMemo(() => {
@@ -784,7 +800,18 @@ function StudentDetail({
     }
     const scheduleText = schedule.map((e) => `${WEEKDAYS[e.day]}${e.time ? ` \xE0s ${e.time}` : ""}`).join(" e ");
     return /* @__PURE__ */ React.createElement("p", { className: "pa-muted", style: { marginTop: 2, textTransform: "capitalize" } }, "Aula toda ", scheduleText, student.lessonsPerMonth ? ` \xB7 ${student.lessonsPerMonth} aula(s)/m\xEAs contratadas` : "");
-  })(), stats && /* @__PURE__ */ React.createElement("p", { className: "pa-muted", style: { marginTop: 2 } }, "Aluno desde ", dateBRFull(stats.startDate), " (", formatDuration(stats.startDate), ") \xB7 ", stats.count, " aula(s) dadas")), /* @__PURE__ */ React.createElement("button", { className: "pa-btn secondary", onClick: () => setEditing(true) }, "Editar")), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 14 } }, /* @__PURE__ */ React.createElement("button", { className: "pa-btn secondary", onClick: onOpenSuggestions }, "\u{1F4A1} Sugest\xF5es de aulas")), overflow && /* @__PURE__ */ React.createElement("div", { className: "pa-card", style: { marginTop: 16, padding: 16, background: "#F3EEFF", border: "1px solid #DCCCFF" } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "#5B3EBF", textTransform: "capitalize" } }, "Esse m\xEAs tem 5 ", overflow.extraWeekdays.join(" e "), "s"), /* @__PURE__ */ React.createElement("p", { style: { margin: "4px 0 0", fontSize: 14 } }, "Uma aula a mais do que o normal nesse dia. Vale perguntar pro aluno se ele quer fazer a aula extra ou pular ela.")), pendingMonths.map((mk) => /* @__PURE__ */ React.createElement(
+  })(), stats && /* @__PURE__ */ React.createElement("p", { className: "pa-muted", style: { marginTop: 2 } }, "Aluno desde ", dateBRFull(stats.startDate), " (", formatDuration(stats.startDate), ") \xB7 ", stats.count, " aula(s) dadas")), /* @__PURE__ */ React.createElement("button", { className: "pa-btn secondary", onClick: () => setEditing(true) }, "Editar")), /* @__PURE__ */ React.createElement("div", { className: "pa-card", style: { padding: 14, marginTop: 16, background: "#FFFBEA", border: "1px solid #F5E6A8" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 } }, /* @__PURE__ */ React.createElement("strong", { style: { fontSize: 13, textTransform: "uppercase", letterSpacing: ".04em", color: "#8A6D00" } }, "\u{1F4DD} Ideias para pr\xF3ximas aulas"), notesText && (!notesConfirmClear ? /* @__PURE__ */ React.createElement("button", { className: "pa-btn ghost", style: { fontSize: 12, padding: "2px 6px" }, onClick: () => setNotesConfirmClear(true) }, "Apagar") : /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12 } }, "Apagar tudo?", " ", /* @__PURE__ */ React.createElement("button", { className: "pa-btn ghost", style: { padding: "2px 6px" }, onClick: handleNotesClear }, "Sim"), /* @__PURE__ */ React.createElement("button", { className: "pa-btn ghost", style: { padding: "2px 6px" }, onClick: () => setNotesConfirmClear(false) }, "N\xE3o")))), /* @__PURE__ */ React.createElement(
+    "textarea",
+    {
+      className: "pa-textarea",
+      style: { background: "transparent", border: "none", padding: 0, resize: "vertical", minHeight: 44 },
+      rows: 2,
+      placeholder: "Anote aqui suas ideias, sem compromisso \u2014 s\xF3 pra n\xE3o esquecer...",
+      value: notesText,
+      onChange: (e) => setNotesText(e.target.value),
+      onBlur: handleNotesBlur
+    }
+  )), /* @__PURE__ */ React.createElement("div", { style: { marginTop: 14 } }, /* @__PURE__ */ React.createElement("button", { className: "pa-btn secondary", onClick: onOpenSuggestions }, "\u{1F4A1} Sugest\xF5es de aulas")), overflow && /* @__PURE__ */ React.createElement("div", { className: "pa-card", style: { marginTop: 16, padding: 16, background: "#F3EEFF", border: "1px solid #DCCCFF" } }, /* @__PURE__ */ React.createElement("strong", { style: { color: "#5B3EBF", textTransform: "capitalize" } }, "Esse m\xEAs tem 5 ", overflow.extraWeekdays.join(" e "), "s"), /* @__PURE__ */ React.createElement("p", { style: { margin: "4px 0 0", fontSize: 14 } }, "Uma aula a mais do que o normal nesse dia. Vale perguntar pro aluno se ele quer fazer a aula extra ou pular ela.")), pendingMonths.map((mk) => /* @__PURE__ */ React.createElement(
     ClosingCard,
     {
       key: mk,
